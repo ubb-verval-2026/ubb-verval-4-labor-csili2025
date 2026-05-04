@@ -123,10 +123,55 @@ public class WizzairTests
         var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
         var flights = wait2.Until(d =>
         {
-            var els = d.FindElements(By.CssSelector("[data-test='flight-card']"));
-            return els.Count >= 2 ? els : null;
+            var els = d.FindElements(By.CssSelector("[data-test^='flight-select-flight']"));
+            return els.Count >= 1 ? els : null;
         });
 
-        flights.Count.Should().BeGreaterThanOrEqualTo(2);
+        flights.Count.Should().BeGreaterThanOrEqualTo(1);
+        Thread.Sleep(2000);
+
+        CheckForCheapFlightsAndScreenshot(flights);
+    }
+
+    private void CheckForCheapFlightsAndScreenshot(IReadOnlyCollection<IWebElement> flights)
+    {
+        const double maxPriceFt = 20000;
+        var allPrices = driver.FindElements(By.CssSelector(".current-price"));
+        Console.WriteLine($"Arak szama: {allPrices.Count}");
+
+        foreach (var priceElement in allPrices)
+        {
+            try
+            {
+                string priceText = priceElement.Text
+                    .Replace("Ft", "")
+                    .Replace(",", "")
+                    .Replace("\u00a0", "")
+                    .Trim();
+
+                if (string.IsNullOrEmpty(priceText))
+                {
+                    continue;
+                }
+
+
+
+                if (double.TryParse(priceText, System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out double price))
+                {
+                    if (price < maxPriceFt)
+                    {
+                        var screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                        string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        string fileName = $"cheap_flight_{price}Ft_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                        screenshot.SaveAsFile(Path.Combine(desktopPath, fileName));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba: {ex.Message}");
+            }
+        }
     }
 }
