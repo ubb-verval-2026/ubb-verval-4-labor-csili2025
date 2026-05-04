@@ -7,7 +7,7 @@
 
 <EditForm Model="@formModel" OnValidSubmit="@HandleOnValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    <ValidationSummary data-test="ValidationSummary" />
 
     <h1>@person.Name</h1>
 
@@ -19,8 +19,10 @@
     <div class="form-group row mb-3">
         <label class="col-md-2 col-form-label">Salary increase percentage: <span class="text-danger">*</span></label>
         <div class="col-md-10">
-            <InputNumber @bind-Value="@formModel.SalaryIncreasePercentage" Placeholder="Enter a percentage value" data-test="SalaryIncreasePercentageInput" />
-            <ValidationMessage For="@(() => formModel.SalaryIncreasePercentage)" />
+            <InputNumber @bind-Value="@formModel.SalaryIncreasePercentage" Placeholder="Enter a percentage value"
+                         data-test="SalaryIncreasePercentageInput" />
+            <ValidationMessage For="@(() => formModel.SalaryIncreasePercentage)"
+                               data-test="SalaryIncreaseValidationMessage" />
         </div>
     </div>
 
@@ -62,9 +64,7 @@
         {
             Console.WriteLine($"Trying to increase salary by {formModel.SalaryIncreasePercentage} failed.");
         }
-
     }
-
 
     public class FormModel
     {
